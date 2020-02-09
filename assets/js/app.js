@@ -18,6 +18,7 @@ $(document).ready(function () {
 
     $("form").on("submit", (event) => {
         event.preventDefault();
+        $(".container").empty();
         let city = $("input").val();
         getWeather(city);
         addToList(city);
@@ -88,15 +89,23 @@ $(document).ready(function () {
 
     const calculateF = (num) => {
         let fahrenheit = (num - 273.15) * 9 / 5 + 32;
-        return fahrenheit.toFixed(2);
+        return fahrenheit.toFixed(0);
     }
 
     const currentDisplay = (str) => {
         const currentContainer = $("<div>").addClass("card mb-3");
         const currentHeader = $("<div>").addClass("card-header").text("Current Conditions");
-        const currentBody = $("<h4>").addClass("card-body").text(cityName);
-        const icon = $("<img>").attr("src", `http://openweathermap.org/img/wn/${str}@2x.png`);
-        $(".container").append(currentContainer).append(currentHeader).append(currentBody, icon);
+        const currentBody = $("<div>").addClass("card-body")
+        const displayCity = $("<h2>").addClass("card-title").text(cityName);
+        const displayTemp = $("<p>").addClass("card-text").text(`Temperature: ${temp}${String.fromCharCode(176)} F`);
+        const displayHumidity = $("<p>").addClass("card-text").text(`Humidity: ${humidity}%`);
+        const displayWindSpeed = $("<p>").addClass("card-text").text(`Wind Speed: ${windSpeed} MPH`);
+        const displayUV = $("<p>").addClass("card-text").text(`UV Index: ${uvIndex}`);
+        const icon = $("<img>").attr("src", `http://openweathermap.org/img/wn/${str}@2x.png`).addClass("icon");
+        currentBody.append(displayCity, icon, displayTemp, displayHumidity, displayWindSpeed, displayUV);
+        currentContainer.append(currentHeader, currentBody)
+        $(".container").append(currentContainer)
+        // $(".container").append(currentContainer).append(currentHeader, icon).append(currentBody).append(displayCity, displayTemp);
     };
 
     const futureDisplay = () => {

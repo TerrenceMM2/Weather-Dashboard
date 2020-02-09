@@ -1,3 +1,15 @@
 .navbar-brand {
     margin: 0 1.5em 0 1em;
 }
+
+.container {
+    margin-top: 3em;
+}
+
+.card-title {
+    display: inline-block;
+}
+
+.icon {
+    display: inline;
+}
