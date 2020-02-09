@@ -1,40 +1,106 @@
-$(document).ready(function() {
+$(document).ready(function () {
 
     const apiKEY = "9f948945c2a7499da3eb43a912f67a23";
 
     let cityName;
+    let cityId;
     let date;
     let currentCondition;
+    let icon;
     let temp;
     let humidity;
     let windSpeed;
+    let lat;
+    let lon;
     let uvIndex;
+    let futureCast = [];
+    let iconArray = [];
 
-    $.ajax({
-        url: `https://api.openweathermap.org/data/2.5/weather?q=Knoxville&appid=${apiKEY}`,
-        method: "GET"
-    }).then(response => {
-        cityName = response.name;
-        date = response.dt;
-        currentCondition = response.weather[0].main;
-        temp = calculateF(response.main.temp);
-        humidity = response.main.humidity;
-        windSpeed = response.wind.speed;
+    $("form").on("submit", (event) => {
+        event.preventDefault();
+        let city = $("input").val();
+        getWeather(city);
+        addToList(city);
+        $("input").val("");
+    });
 
-        console.log(response);
-        console.log(cityName);
-        console.log(date);
-        console.log(moment().utc(date).format('h[:]mm A MMMM Do[,] YYYY'));
-        console.log(currentCondition);
-        console.log(temp);
-        console.log(humidity);
-        console.log(windSpeed);
-    }).catch(error => {
-        console.log(error);
+    $(".dropdown-item").on("click", () => {
+        let savedCity = $(".dropdown-item").data("city");
     })
 
-    const calculateF = (num) => {
-        return (num - 273.15) * 9/5 + 32;
+    // @GET - OpenWeatherMap - Current Weather API
+    const getWeather = (city) => {
+        $.ajax({
+            url: `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKEY}`,
+            method: "GET"
+        }).then(response => {
+            cityName = response.name;
+            cityId = response.id;
+            date = moment().utc(response.dt).format('h[:]mm A MMMM Do[,] YYYY');
+            currentCondition = response.weather[0].main;
+            icon = response.weather[0].icon;
+            temp = calculateF(response.main.temp);
+            humidity = response.main.humidity;
+            windSpeed = response.wind.speed;
+            lat = response.coord.lat;
+            lon = response.coord.lon;
+
+            // @GET - OpenWeatherMap - UV API
+            $.ajax({
+                url: `http://api.openweathermap.org/data/2.5/uvi?appid=${apiKEY}&lat=${lat}&lon=${lon}`,
+                method: "GET"
+            }).then(response => {
+                uvIndex = response.value
+            }).catch(error => {
+                console.log(error);
+            });
+
+            // @GET - OpenWeatherMap - 5 day / 3 hour API
+            $.ajax({
+                url: `http://api.openweathermap.org/data/2.5/forecast?appid=${apiKEY}&lat=${lat}&lon=${lon}`,
+                method: "GET"
+            }).then(response => {
+                response.list.forEach(result => {
+                    if (result.dt_txt.includes("12:00")) {
+                        futureCast.push(result);
+                    }
+                });
+
+            currentDisplay(icon);
+
+            }).catch(error => {
+                console.log(error);
+            });
+        }).catch(error => {
+            console.log(error);
+        });
+    };
+
+    const addToList = (str) => {
+        const menuItem = $("<a>").addClass("dropdown-item").attr("data-city", str).text(str);
+        $("#menu").append(menuItem);
     }
+
+    const calculateTime = (num) => {
+        console.log(num)
+        return moment().utc(num).format('h[:]mm A MMMM Do[,] YYYY')
+    }
+
+    const calculateF = (num) => {
+        let fahrenheit = (num - 273.15) * 9 / 5 + 32;
+        return fahrenheit.toFixed(2);
+    }
+
+    const currentDisplay = (str) => {
+        const currentContainer = $("<div>").addClass("card mb-3");
+        const currentHeader = $("<div>").addClass("card-header").text("Current Conditions");
+        const currentBody = $("<h4>").addClass("card-body").text(cityName);
+        const icon = $("<img>").attr("src", `http://openweathermap.org/img/wn/${str}@2x.png`);
+        $(".container").append(currentContainer).append(currentHeader).append(currentBody, icon);
+    };
+
+    const futureDisplay = () => {
+
+    };
 
 });
