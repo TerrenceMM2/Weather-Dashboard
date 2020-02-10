@@ -21,12 +21,13 @@ $(document).ready(function () {
         $(".container").empty();
         let city = $("input").val();
         getWeather(city);
-        addToList(city);
         $("input").val("");
     });
 
-    $(".dropdown-item").on("click", () => {
-        let savedCity = $(".dropdown-item").data("city");
+    $("#menu").on("click", ".dropdown-item", (event) => {
+        $(".container").empty();
+        let savedCity = event.target.text;
+        getWeather(savedCity);
     })
 
     // @GET - OpenWeatherMap - Current Weather API
@@ -45,6 +46,8 @@ $(document).ready(function () {
             windSpeed = response.wind.speed;
             lat = response.coord.lat;
             lon = response.coord.lon;
+
+            addToList(city);
 
             // @GET - OpenWeatherMap - UV API
             $.ajax({
@@ -105,7 +108,6 @@ $(document).ready(function () {
         currentBody.append(displayCity, icon, displayTemp, displayHumidity, displayWindSpeed, displayUV);
         currentContainer.append(currentHeader, currentBody)
         $(".container").append(currentContainer)
-        // $(".container").append(currentContainer).append(currentHeader, icon).append(currentBody).append(displayCity, displayTemp);
     };
 
     const futureDisplay = () => {
