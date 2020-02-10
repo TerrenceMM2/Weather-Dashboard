@@ -56,7 +56,7 @@ $(document).ready(function () {
                 uvIndex = response.value;
                 currentDisplay(icon);
             }).catch(error => {
-                console.log(error);
+                errorModal(error);
             });
 
             // @GET - OpenWeatherMap - 5 day / 3 hour API
@@ -69,12 +69,11 @@ $(document).ready(function () {
                         futureDisplay(result);
                     }
                 });
-            
             }).catch(error => {
-                console.log(error);
+                errorModal(error);
             });
         }).catch(error => {
-            console.log(error);
+            errorModal(error);
         });
     };
 
@@ -140,6 +139,12 @@ $(document).ready(function () {
         currentContainer.append(currentHeader, currentBody);
         $("#future-display").append(currentContainer);
     };
+
+    const errorModal = (error) => {
+        $("#error-modal").modal("show");
+        $(".modal-title").append(error.status);
+        $(".modal-body > p").text(error.statusText)
+    }
 
     historyMenu();
 
