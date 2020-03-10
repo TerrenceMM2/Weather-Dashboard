@@ -1,6 +1,6 @@
 $(document).ready(function () {
 
-    const apiKEY = "9f948945c2a7499da3eb43a912f67a23";
+    const apiKEY = API_KEY;
 
     let cityName;
     let cityId;
