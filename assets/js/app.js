@@ -38,12 +38,20 @@ $(document).ready(function () {
         getWeather(savedCity);
     });
 
+    $("#clear").on("click", (event) => {
+        localStorage.clear("savedCities")
+        cities = [];
+        $("#menu").empty();
+        $("#current-display").empty();
+        $("#future-display").empty();
+    });
+
     // @GET - OpenWeatherMap - Current Weather API
     const getWeather = (city) => {
         if (city === undefined) {
             return;
         }
-        
+
         $.ajax({
             url: `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKEY}`,
             method: "GET"

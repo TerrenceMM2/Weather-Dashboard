@@ -2,6 +2,12 @@
     margin: 0 1.5em 0 1em;
 }
 
+#clear {
+    align-self: flex-end;
+    margin-left: auto;
+    margin-right: 2rem;
+}
+
 .container {
     margin-top: 3em;
 }
