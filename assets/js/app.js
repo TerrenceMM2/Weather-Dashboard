@@ -14,12 +14,21 @@ $(document).ready(function () {
     let lon;
     let uvIndex;
 
+    let cities = [];
+    
+    if (localStorage.getItem("savedCities") != null) {
+        cities = JSON.parse(localStorage.getItem("savedCities"));
+    }
+
+    let lastCity = cities[cities.length - 1];
+
     $("form").on("submit", (event) => {
         event.preventDefault();
         $(".container").empty();
         let city = $("input").val();
         getWeather(city);
-        localStorage.setItem("city-" + city, city);
+        addToList(city);
+        setLocalStorage(cities);
         $("input").val("");
     });
 
@@ -31,6 +40,10 @@ $(document).ready(function () {
 
     // @GET - OpenWeatherMap - Current Weather API
     const getWeather = (city) => {
+        if (city === undefined) {
+            return;
+        }
+        
         $.ajax({
             url: `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKEY}`,
             method: "GET"
@@ -46,11 +59,9 @@ $(document).ready(function () {
             lat = response.coord.lat;
             lon = response.coord.lon;
 
-            addToList(city);
-
             // @GET - OpenWeatherMap - UV API
             $.ajax({
-                url: `http://api.openweathermap.org/data/2.5/uvi?appid=${apiKEY}&lat=${lat}&lon=${lon}`,
+                url: `https://api.openweathermap.org/data/2.5/uvi?appid=${apiKEY}&lat=${lat}&lon=${lon}`,
                 method: "GET"
             }).then(response => {
                 uvIndex = response.value;
@@ -61,7 +72,7 @@ $(document).ready(function () {
 
             // @GET - OpenWeatherMap - 5 day / 3 hour API
             $.ajax({
-                url: `http://api.openweathermap.org/data/2.5/forecast?appid=${apiKEY}&lat=${lat}&lon=${lon}`,
+                url: `https://api.openweathermap.org/data/2.5/forecast?appid=${apiKEY}&lat=${lat}&lon=${lon}`,
                 method: "GET"
             }).then(response => {
                 response.list.forEach(result => {
@@ -78,29 +89,37 @@ $(document).ready(function () {
     };
 
     const historyMenu = () => {
-        for (var i = 0; i < localStorage.length; i++) {
-            if (localStorage.key(i).substring(0,4) === "city") {
-                let key = localStorage.key(i);
-                addToList(localStorage.getItem(key));
-            };
-        };
+        for (var i = 0; i < cities.length; i++) {
+            const menuItem = $("<a>").addClass("dropdown-item").attr("data-city", cities[i]).text(cities[i]);
+            $("#menu").append(menuItem);
+        }
     };
 
+    //
     const addToList = (str) => {
-        const menuItem = $("<a>").addClass("dropdown-item").attr("data-city", str).text(str);
-        $("#menu").append(menuItem);
+        cities.push(str);
+        $("#menu").empty();
+        historyMenu();
     };
 
+    const setLocalStorage = (arr) => {
+        localStorage.clear("savedCities");
+        localStorage.setItem("savedCities", JSON.stringify(arr));
+    }
+
+    // Calculates and returns formatted time
     const calculateTime = (num) => {
         let local = moment.unix(num);
         return moment(local).format('dddd [-] M[.]D[.]YY [\n] h[:]mm A ')
     };
 
+    // Calculates Fahrenheit
     const calculateF = (num) => {
         let fahrenheit = (num - 273.15) * 9 / 5 + 32;
         return fahrenheit.toFixed(0);
     };
 
+    // Displays current weather conditions
     const currentDisplay = (str) => {
         const currentContainer = $("<div>").addClass("card mb-3");
         const currentHeader = $("<div>").addClass("card-header").text(`Current Conditions: ${date}`);
@@ -111,7 +130,7 @@ $(document).ready(function () {
         const displayWindSpeed = $("<p>").addClass("card-text").text(`Wind Speed: ${windSpeed} MPH`);
         const uvSpan = uvDisplay(uvIndex);
         const displayUV = $("<p>").addClass("card-text").text("UV Index: ");
-        const icon = $("<img>").attr("src", `http://openweathermap.org/img/wn/${str}@2x.png`).addClass("current-icon");
+        const icon = $("<img>").attr("src", `https://openweathermap.org/img/wn/${str}@2x.png`).addClass("current-icon");
         displayUV.append(uvSpan);
         currentBody.append(displayCity, icon, displayTemp, displayHumidity, displayWindSpeed, displayUV);
         currentContainer.append(currentHeader, currentBody);
@@ -128,18 +147,20 @@ $(document).ready(function () {
         }
     };
 
+    // Displays 5-day forcast
     const futureDisplay = (obj) => {
         const currentContainer = $("<div>").addClass("card mb-3 future");
         const currentHeader = $("<div>").addClass("card-header").text(`${calculateTime(obj.dt)}`);
         const currentBody = $("<div>").addClass("card-body")
         const displayTemp = $("<p>").addClass("card-text").text(`Temperature: ${calculateF(obj.main.temp)}${String.fromCharCode(176)} F`);
         const displayHumidity = $("<p>").addClass("card-text").text(`Humidity: ${obj.main.humidity}%`);
-        const icon = $("<img>").attr("src", `http://openweathermap.org/img/wn/${obj.weather[0].icon}@2x.png`).addClass("icon");
+        const icon = $("<img>").attr("src", `https://openweathermap.org/img/wn/${obj.weather[0].icon}@2x.png`).addClass("icon");
         currentBody.append(icon, displayTemp, displayHumidity);
         currentContainer.append(currentHeader, currentBody);
         $("#future-display").append(currentContainer);
     };
 
+    // Displays Error modal if enter city is not valid
     const errorModal = (error) => {
         $("#error-modal").modal("show");
         $(".modal-title").append(error.status);
@@ -147,5 +168,5 @@ $(document).ready(function () {
     }
 
     historyMenu();
-
+    getWeather(lastCity);
 });
