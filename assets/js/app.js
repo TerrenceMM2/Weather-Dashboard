@@ -27,7 +27,9 @@ $(document).ready(function () {
         $(".container").empty();
         let city = $("input").val();
         getWeather(city);
-        addToList(city);
+        if (!cities.includes(city)){
+            addToList(city);
+        }
         setLocalStorage(cities);
         $("input").val("");
     });
