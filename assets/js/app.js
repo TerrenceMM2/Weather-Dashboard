@@ -26,11 +26,11 @@ $(document).ready(function () {
         event.preventDefault();
         $(".container").empty();
         let city = $("input").val();
-        getWeather(city);
-        if (!cities.includes(city)){
-            addToList(city);
-        }
-        setLocalStorage(cities);
+        getWeather(city)
+        // if (!cities.includes(city)) {
+        //     addToList(city);
+        // }
+        // setLocalStorage(cities);
         $("input").val("");
     });
 
@@ -78,6 +78,7 @@ $(document).ready(function () {
                 currentDisplay(icon);
             }).catch(error => {
                 errorModal(error);
+                return false;
             });
 
             // @GET - OpenWeatherMap - 5 day / 3 hour API
@@ -92,9 +93,17 @@ $(document).ready(function () {
                 });
             }).catch(error => {
                 errorModal(error);
+                return false;
             });
+
+            if (!cities.includes(city)) {
+                addToList(city);
+            }
+            setLocalStorage(cities);
+
         }).catch(error => {
             errorModal(error);
+            return false;
         });
     };
 
@@ -173,8 +182,9 @@ $(document).ready(function () {
     // Displays Error modal if enter city is not valid
     const errorModal = (error) => {
         $("#error-modal").modal("show");
-        $(".modal-title").append(error.status);
-        $(".modal-body > p").text(error.statusText)
+        $(".modal-title").empty();
+        $(".modal-title").append(error.responseJSON.cod  + " - " + error.statusText);
+        $(".modal-body > p").text(error.responseJSON.message)
     }
 
     historyMenu();
