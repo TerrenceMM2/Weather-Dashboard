@@ -10,9 +10,9 @@ A weather dashboard that displays current conditions and a 5-day forecast of a g
 - The current weather conditions for the given city are shown in the top box.
 - The 5-day forecast is shown in the bottom boxes.
 - The search city is saved and can be recalled by selecting the city from the "Saved Cities" drop-down menu.
-- The most recently search city is shown automatically when revisiting the page.
-- To clear you search history, click the "Clear" button.
-- An error is shown is the city is not valid. The city is not saved.
+- The most recent searched city is shown automatically when revisiting the page.
+- To clear your search history, click the "Clear" button.
+- An error is shown if the city provided is not valid. The city is not saved.
 
 ## Screenshot
 ![Weather Dashboard Screenshot](../media/screenshot.png?raw=true)
